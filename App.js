@@ -24,9 +24,14 @@ export default class App extends Component {
 		const photos = RealmManager.sharedInstance
 			.objects('Photo')
 			.filtered('inTrash == false')
-			.sorted('timestamp', false);
+			.sorted('timestamp');
 
+		// This is super slow beyond a few thousand photos
 		const mostRecentPhotos = photos.slice(Math.max(photos.length - 3, 0));
+
+		// But this is fast?
+		// const mostRecentPhotos = photos.slice(0, 3);
+
 		Profiler.stop('query');
 
 		this.setState({
@@ -75,6 +80,7 @@ const styles = StyleSheet.create({
 	},
 	photoContainer: {
 		flexDirection: 'row',
+		margin: 10,
 	},
 	image: {
 		width: '33%',
