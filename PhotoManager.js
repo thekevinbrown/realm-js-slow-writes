@@ -98,9 +98,9 @@ class PhotoManagerImplementation {
 				}
 			});
 
-			notificationReceiver && notificationReceiver({ importId, photoCount, complete: true });
-
 			Profiler.stop('deleteExtraPhotos');
+
+			notificationReceiver && notificationReceiver({ importId, photoCount, complete: true });
 		};
 
 		InteractionManager.runAfterInteractions(importPage);

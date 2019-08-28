@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
 import { PhotoManager } from './PhotoManager';
 import { RealmManager } from './RealmManager';
 import { Profiler } from './Profiler';
@@ -20,19 +20,34 @@ export default class App extends Component {
 	pageImported = ({ photoCount, complete }) => {
 		const samples = Profiler.sampleAll();
 
-		Profiler.start('query');
+		// ---------------------------------
+
+		Profiler.start('3 Photos Query');
 		const photos = RealmManager.sharedInstance
 			.objects('Photo')
 			.filtered('inTrash == false')
 			.sorted('timestamp');
 
 		// This is super slow beyond a few thousand photos
-		const mostRecentPhotos = photos.slice(Math.max(photos.length - 3, 0));
+		// const mostRecentPhotos = photos.slice(Math.max(photos.length - 3, 0));
 
 		// But this is fast?
-		// const mostRecentPhotos = photos.slice(0, 3);
+		const mostRecentPhotos = photos.slice(0, 3);
 
-		Profiler.stop('query');
+		Profiler.stop('3 Photos Query');
+
+		// ---------------------------------
+
+		Profiler.start('Sorted Photos Query');
+		const sortedPhotos = RealmManager.sharedInstance
+			.objects('Photo')
+			.filtered('inTrash == false')
+			.filtered('albums.@count > 0')
+			.sorted('timestamp');
+
+		const sortedPhotoCount = sortedPhotos.length;
+
+		Profiler.stop('Sorted Photos Query');
 
 		this.setState({
 			samples,
@@ -46,7 +61,7 @@ export default class App extends Component {
 		const { samples, photoCount, complete, mostRecentPhotos } = this.state;
 
 		return (
-			<View style={styles.container}>
+			<ScrollView style={styles.fill} contentContainerStyle={styles.container}>
 				<Text>Imported {photoCount} photos</Text>
 				{complete ? <Text>Complete</Text> : <Text>In Progress</Text>}
 				{Object.entries(samples).map(([key, sample]) => (
@@ -62,16 +77,18 @@ export default class App extends Component {
 						<Image key={photo.uri} source={{ uri: photo.uri }} style={styles.image} />
 					))}
 				</View>
-			</View>
+			</ScrollView>
 		);
 	}
 }
 
 const styles = StyleSheet.create({
+	fill: {
+		flex: 1,
+	},
 	container: {
 		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
+		marginHorizontal: 20,
 	},
 	heading: {
 		marginTop: 10,
@@ -80,7 +97,6 @@ const styles = StyleSheet.create({
 	},
 	photoContainer: {
 		flexDirection: 'row',
-		margin: 10,
 	},
 	image: {
 		width: '33%',
