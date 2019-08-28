@@ -29,10 +29,10 @@ export default class App extends Component {
 			.sorted('timestamp');
 
 		// This is super slow beyond a few thousand photos
-		// const mostRecentPhotos = photos.slice(Math.max(photos.length - 3, 0));
+		const mostRecentPhotos = photos.slice(Math.max(photos.length - 3, 0));
 
 		// But this is fast?
-		const mostRecentPhotos = photos.slice(0, 3);
+		// const mostRecentPhotos = photos.slice(0, 3);
 
 		Profiler.stop('3 Photos Query');
 
